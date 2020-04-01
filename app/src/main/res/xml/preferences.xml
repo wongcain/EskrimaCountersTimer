@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:key="@string/pref_beats_key"
+        android:title="@string/pref_beats_title"
+        android:entries="@array/pref_beats_choices"
+        android:summary="@string/pref_beats_summary"
+        android:entryValues="@array/pref_beats_choices"
+        android:dialogTitle="@string/pref_beats_title"
+        android:defaultValue="8"/>
+
+    <MultiSelectListPreference
+        android:key="@string/pref_counters_key"
+        android:title="@string/pref_counters_title"
+        android:entries="@array/pref_counters_choices"
+        android:summary="@string/pref_counters_Summary"
+        android:entryValues="@array/pref_counters_choices"
+        android:dialogTitle="@string/pref_counters_title"
+        android:defaultValue="@array/pref_counters_choices"/>
+
+</PreferenceScreen>

@@ -1,0 +1,9 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents">
+        <item name="colorPrimary">#FEB200</item>
+        <item name="colorSecondary">#FEB200</item>
+    </style>
+
+</resources>

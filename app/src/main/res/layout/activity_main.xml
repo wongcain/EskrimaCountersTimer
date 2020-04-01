@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="vm"
+            type="com.cainwong.eskrimacounterstimer.ui.MainViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.MainActivity">
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@{vm.playStopIconResId}"
+            android:layout_margin="@dimen/fab_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:onClick="@{() -> vm.onPlayStopClicked()}"/>
+
+        <FrameLayout
+            android:id="@+id/tempo"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:background="@drawable/circle"
+            android:layout_margin="20dp"
+            android:padding="20dp"
+            android:onClick="@{() -> vm.onTapTempo()}"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tempo_instructions"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
+
+            <TextView
+                android:id="@+id/tempo_text"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:text="@{vm.tempoText}"
+                android:textSize="48sp"
+                android:textColor="?android:textColorPrimaryInverse" />
+        </FrameLayout>
+
+
+        <TextView
+            android:id="@+id/tempo_instructions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tap_to_set_tempo"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintTop_toBottomOf="@id/tempo"
+            app:layout_constraintBottom_toTopOf="@id/fab"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <ImageView
+            android:id="@+id/plus_1_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_exposure_plus_1_white_48dp"
+            android:contentDescription="+"
+            android:onClick="@{() -> vm.onPlus()}"
+            app:layout_constraintTop_toTopOf="@id/tempo"
+            app:layout_constraintBottom_toBottomOf="@id/tempo"
+            app:layout_constraintLeft_toRightOf="@id/tempo"
+            app:layout_constraintRight_toRightOf="parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            tools:ignore="HardcodedText" />
+
+        <ImageView
+            android:id="@+id/minus_1_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_exposure_neg_1_white_48dp"
+            android:contentDescription="-"
+            android:onClick="@{() -> vm.onMinus()}"
+            app:layout_constraintTop_toTopOf="@id/tempo"
+            app:layout_constraintBottom_toBottomOf="@id/tempo"
+            app:layout_constraintRight_toLeftOf="@id/tempo"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            tools:ignore="HardcodedText" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">Eskrima Counters Timer</string>
+    <string name="tap_to_set_tempo">Tap to set tempo</string>
+    <string name="tempo_disp">%1$d BPM</string>
+    <string name="action_settings">Settings</string>
+    <string name="pref_delay_key">delay</string>
+    <string name="pref_beats_key">beats_key</string>
+    <string name="pref_beats_title">Length</string>
+    <string name="pref_beats_summary">Click to select how many beats between each counter</string>
+    <string-array name="pref_beats_choices">
+        <item>2</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>16</item>
+    </string-array>
+    <string name="pref_counters_key">counters_key</string>
+    <string name="pref_counters_title">Counters</string>
+    <string name="pref_counters_Summary">Click to select which counters are included</string>
+    <string-array name="pref_counters_choices">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+    <string name="notification_channel_id">general</string>
+    <string name="notification_channel_description">General</string>
+    <string name="notification_text">Running…</string>
+    <string name="notification_action_stop">Stop</string>
+</resources>
