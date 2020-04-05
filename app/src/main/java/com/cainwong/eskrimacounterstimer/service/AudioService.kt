@@ -104,7 +104,7 @@ class AudioService : Service() {
                             null
                         ) ?: Collections.emptySet()
                         if (counters.isNotEmpty() && count == 1) {
-                            val index = ThreadLocalRandom.current().nextInt(0, counters.size -1)
+                            val index = ThreadLocalRandom.current().nextInt(0, counters.size)
                             playCounterSound(counters.toList()[index].toInt())
                         } else {
                             playClick()
