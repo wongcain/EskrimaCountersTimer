@@ -10,7 +10,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.cainwong.eskrimacounterstimer.R
 import com.cainwong.eskrimacounterstimer.databinding.ActivityMainBinding
-import com.cainwong.eskrimacounterstimer.services.AudioService
+import com.cainwong.eskrimacounterstimer.service.AudioService
 import org.koin.android.viewmodel.ext.android.viewModel
 
 

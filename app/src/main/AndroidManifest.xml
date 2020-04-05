@@ -22,9 +22,9 @@
 
         <activity android:name=".ui.SettingsActivity" />
 
-        <service android:name=".services.AudioService"/>
+        <service android:name=".service.AudioService"/>
 
-        <service android:name=".services.TtsCacheService"/>
+        <service android:name=".service.TtsCacheService"/>
 
     </application>
 

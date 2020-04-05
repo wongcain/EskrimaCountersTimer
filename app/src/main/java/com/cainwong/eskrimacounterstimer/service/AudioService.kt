@@ -1,16 +1,10 @@
-package com.cainwong.eskrimacounterstimer.services
+package com.cainwong.eskrimacounterstimer.service
 
 import android.app.*
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.AssetFileDescriptor
-import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
-import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
 import androidx.core.app.NotificationCompat
 import com.cainwong.eskrimacounterstimer.R
 import com.cainwong.eskrimacounterstimer.core.Metronome
@@ -18,17 +12,20 @@ import com.cainwong.eskrimacounterstimer.ui.MainActivity
 import io.reactivex.disposables.Disposable
 import org.koin.android.ext.android.inject
 import timber.log.Timber
-import java.io.File
 import java.util.*
 import android.app.PendingIntent
+import android.media.AudioAttributes
+import android.media.SoundPool
 import java.util.concurrent.ThreadLocalRandom
 
 
-const val ONGOING_NOTIFICATION_ID = 123
-const val MAX_RANDOM = 12
-const val ACTION_STOP_SERVICE = "stop"
-
 class AudioService : Service() {
+
+    private val notificationId = 123
+
+    private val maxRandom = 12
+
+    private val stopService = "stop"
 
     private val metronome: Metronome by inject()
 
@@ -38,21 +35,31 @@ class AudioService : Service() {
 
     private var beatDisposable: Disposable? = null
 
-    private lateinit var mp: MediaPlayer
-
-    private lateinit var clickFileDescriptor: AssetFileDescriptor
-
     private lateinit var channelId: String
+
+    private lateinit var soundPool: SoundPool
+
+    private lateinit var soundIdsMap: Map<Int, Int>
 
     override fun onCreate() {
         super.onCreate()
 
-        clickFileDescriptor = resources.openRawResourceFd(R.raw.click)
         channelId = getString(R.string.notification_channel_id)
 
-        mp = MediaPlayer().apply {
-            setOnPreparedListener { start() }
-            setOnCompletionListener { reset() }
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(2)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .build()
+            ).build()
+
+        soundIdsMap = (0..maxRandom).associateWith {
+            soundPool.load(
+                this,
+                resources.getIdentifier("s$it", "raw", packageName),
+                1)
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -65,7 +72,7 @@ class AudioService : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        if (ACTION_STOP_SERVICE.equals(intent.getAction())) {
+        if (stopService == intent.action) {
             metronome.togglePlay()
             stopSelf()
         } else {
@@ -75,7 +82,7 @@ class AudioService : Service() {
                 }
 
             val stopSelf = Intent(this, AudioService::class.java)
-            stopSelf.action = ACTION_STOP_SERVICE
+            stopSelf.action = stopService
             val pStopSelf =
                 PendingIntent.getService(this, 0, stopSelf, PendingIntent.FLAG_CANCEL_CURRENT)
             val notification = NotificationCompat.Builder(this, channelId)
@@ -87,7 +94,7 @@ class AudioService : Service() {
                 .addAction(R.drawable.ic_stop_white_24dp, "Stop", pStopSelf)
                 .build()
 
-            startForeground(ONGOING_NOTIFICATION_ID, notification)
+            startForeground(notificationId, notification)
 
             if (beatDisposable?.isDisposed != false) {
                 beatDisposable = metronome.beatCount.subscribe(
@@ -98,7 +105,7 @@ class AudioService : Service() {
                         ) ?: Collections.emptySet()
                         if (counters.isNotEmpty() && count == 1) {
                             val index = ThreadLocalRandom.current().nextInt(0, counters.size -1)
-                            playCounterSound(counters.toList()[index])
+                            playCounterSound(counters.toList()[index].toInt())
                         } else {
                             playClick()
                         }
@@ -111,27 +118,16 @@ class AudioService : Service() {
     }
 
     private fun playClick() {
-        mp.run {
-            reset()
-            setDataSource(
-                clickFileDescriptor.fileDescriptor,
-                clickFileDescriptor.startOffset,
-                clickFileDescriptor.length
-            )
-            prepareAsync()
-        }
+        playCounterSound(0)
     }
 
-    private fun playCounterSound(counter: String) {
-        mp.run {
-            reset()
-            try {
-                setDataSource(applicationContext, Uri.fromFile(File(filesDir, "${counter}.wav")))
-                prepareAsync()
-            } catch (e: Exception) {
-                Timber.e(e, "Error playing: ${counter}.wav")
-            }
+    private fun playCounterSound(soundIndex: Int) {
+        val soundId = soundIdsMap[soundIndex]
+        if (soundId == null)  {
+            Timber.e("Unable to find sound id for index $soundIndex")
+            return
         }
+        soundPool.play(soundId, 1F, 1F, 1, 0, 1F)
     }
 
     override fun onDestroy() {
@@ -143,51 +139,5 @@ class AudioService : Service() {
 
     override fun onBind(intent: Intent): IBinder? {
         return null
-    }
-}
-
-
-class TtsCacheService() : IntentService("TTS Cache Service") {
-    lateinit var tts: TextToSpeech
-
-    override fun onHandleIntent(p0: Intent?) {
-        tts = TextToSpeech(applicationContext,
-            TextToSpeech.OnInitListener { status ->
-                if (status != TextToSpeech.ERROR) {
-                    onTtsInit()
-                }
-            })
-    }
-
-    private fun onTtsInit() {
-        Timber.d("Started TTS for caching...")
-        var doneCount = 0
-        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onDone(p0: String?) {
-                incrementDone()
-            }
-
-            override fun onError(p0: String?) {
-                incrementDone()
-            }
-
-            override fun onStart(p0: String?) {}
-
-            private fun incrementDone() {
-                doneCount++
-                if (doneCount == MAX_RANDOM) {
-                    Timber.d("Caching complete.  Shutting TTS down.")
-                    tts.stop()
-                    tts.shutdown()
-                }
-            }
-
-        })
-        tts.language = Locale.getDefault()
-        (1..MAX_RANDOM).forEach {
-            val file = File(filesDir, "${it}.wav")
-            Timber.d("Creating ${file.name}")
-            tts.synthesizeToFile(it.toString(), Bundle(), file, it.toString())
-        }
     }
 }
